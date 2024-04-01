@@ -1,19 +1,27 @@
-import * as React from "react";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import CssBaseline from "@mui/material/CssBaseline";
-import Drawer from "@mui/material/Drawer";
-import IconButton from "@mui/material/IconButton";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import MenuIcon from "@mui/icons-material/Menu";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import { Fullscreen, DarkMode } from "@mui/icons-material";
+import React, { useState } from "react";
+import {
+  AppBar,
+  Box,
+  CssBaseline,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+  Typography,
+  Paper,
+  Menu,
+  MenuItem,
+} from "@mui/material";
+import { Fullscreen, DarkMode, Menu as MenuIcon } from "@mui/icons-material";
 import { Outlet } from "react-router";
+import Dashboard from "../Dashboard";
+import { useSelector, useDispatch } from "react-redux";
+import { toggleDarkMode } from "../../store/slice";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 const drawerWidth = 240;
 
@@ -25,10 +33,35 @@ interface Props {
   window?: () => Window;
 }
 
+interface DarkThemeColors {
+  backgroundColor: string;
+  textColor: string;
+}
+
+const darkThemeColors: DarkThemeColors = {
+  backgroundColor: "rgb(18, 18, 18)",
+  textColor: "#fff",
+};
+
 export default function ResponsiveDrawer(props: Props) {
   const { window } = props;
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = React.useState(true);
   const [isClosing, setIsClosing] = React.useState(false);
+  const darkMode = useSelector((state: any) => state.user.darkMode);
+  const dispatch = useDispatch();
+  const { backgroundColor, textColor } = darkMode
+    ? darkThemeColors
+    : { backgroundColor: "#fff", textColor: "#000" };
+
+  const [dropDown, setdropDown] = useState(null);
+
+  const handleClick = (event: any) => {
+    setdropDown(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setdropDown(null);
+  };
 
   const handleDrawerClose = () => {
     setIsClosing(true);
@@ -42,6 +75,18 @@ export default function ResponsiveDrawer(props: Props) {
   const handleDrawerToggle = () => {
     if (!isClosing) {
       setMobileOpen(!mobileOpen);
+    }
+  };
+  const toggleFullscreen = () => {
+    const elem = document.documentElement;
+    if (!document.fullscreenElement) {
+      elem.requestFullscreen().catch((err) => {
+        console.log(
+          `Error attempting to enable full-screen mode: ${err.message} (${err.name})`
+        );
+      });
+    } else {
+      document.exitFullscreen();
     }
   };
 
@@ -208,7 +253,13 @@ export default function ResponsiveDrawer(props: Props) {
     window !== undefined ? () => window().document.body : undefined;
 
   return (
-    <>
+    <div
+      className="main-container"
+      style={{
+        backgroundColor: darkMode ? " #000" : "#fff",
+        height: "100vh",
+      }}
+    >
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
 
@@ -217,29 +268,49 @@ export default function ResponsiveDrawer(props: Props) {
           sx={{
             width: { sm: `calc(100% - ${drawerWidth}px)` },
             ml: { sm: `${drawerWidth}px` },
-            background: "#fff",
+            backgroundColor: backgroundColor,
           }}
         >
           <Toolbar>
             <IconButton
-              color="inherit"
+              color="primary" 
               aria-label="open drawer"
               edge="start"
               onClick={handleDrawerToggle}
-              sx={{ mr: 2, display: { sm: "none" } }}
+              sx={{
+                mr: 2,
+                display: { sm: "none" },
+                "&:hover": {
+                  backgroundColor: "transparent",
+                },
+                "&:active": {
+                  backgroundColor: "transparent",
+                },
+              }}
             >
               <MenuIcon />
             </IconButton>
+
             <Typography
               variant="h6"
               noWrap
               component="div"
-              sx={{ color: "rgb(61, 68, 101)", fontSize: "30px" }}
+              sx={{ color: textColor, fontSize: "30px" }}
             >
               Balboa Admin
             </Typography>
 
-            <IconButton sx={{ ml: "auto" }}>
+            <IconButton
+              sx={{
+                ml: "auto",
+                "&:hover": {
+                  backgroundColor: "transparent",
+                },
+                "&:active": {
+                  backgroundColor: "transparent",
+                },
+              }}
+            >
               <div
                 style={{
                   width: 40,
@@ -250,12 +321,23 @@ export default function ResponsiveDrawer(props: Props) {
                   justifyContent: "center",
                   borderRadius: "5px",
                 }}
+                onClick={() => dispatch(toggleDarkMode())}
               >
                 <DarkMode sx={{ width: "40px", color: "rgb(61, 68, 101" }} />
               </div>
             </IconButton>
 
-            <IconButton>
+            <IconButton
+              onClick={toggleFullscreen}
+              sx={{
+                "&:hover": {
+                  backgroundColor: "transparent",
+                },
+                "&:active": {
+                  backgroundColor: "transparent",
+                },
+              }}
+            >
               <div
                 style={{
                   width: 40,
@@ -272,37 +354,89 @@ export default function ResponsiveDrawer(props: Props) {
                 />
               </div>
             </IconButton>
-            <>
-              <img
-                src={require("../../assets/profile.jpg")}
-                alt=""
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: "5px",
-                  marginLeft: "5px",
-                }}
-              />
 
-              <p
-                style={{
-                  color: "black",
-                  margin: "0",
-                  marginLeft: "7px",
-                  fontSize: "14px",
+            <div>
+              <IconButton
+                aria-controls="account-menu"
+                aria-haspopup="true"
+                onClick={handleClick}
+                color="inherit"
+                sx={{
+                  "&:hover": {
+                    backgroundColor: "transparent",
+                  },
+                  "&:active": {
+                    backgroundColor: "transparent",
+                  },
                 }}
               >
-                Hey,{" "}
-                <span
+                <img
+                  src={require("../../assets/profile.jpg")}
+                  alt=""
                   style={{
-                    fontWeight: "bold",
+                    width: 40,
+                    height: 40,
+                    borderRadius: "5px",
+                    marginLeft: "5px",
+                  }}
+                />
+                <p
+                  style={{
+                    color: textColor,
+                    margin: "0",
+                    marginLeft: "7px",
+                    fontSize: "14px",
                   }}
                 >
-                  Demo
-                </span>{" "}
-                <br /> Admin
-              </p>
-            </>
+                  Hey,{" "}
+                  <span
+                    style={{
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Demo
+                  </span>{" "}
+                  <br /> Admin
+                </p>
+              </IconButton>
+              <Menu
+                id="account-menu"
+                anchorEl={dropDown}
+                keepMounted
+                open={Boolean(dropDown)}
+                onClose={handleClose}
+                PaperProps={{
+                  elevation: 0,
+                  sx: {
+                    overflow: "visible",
+                    filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                    mt: 1.5,
+                    "& .MuiAvatar-root": {
+                      width: 32,
+                      height: 32,
+                      ml: -0.5,
+                      mr: 1,
+                    },
+                    "&::before": {
+                      content: '""',
+                      display: "block",
+                      position: "absolute",
+                      top: 0,
+                      right: 14,
+                      width: 10,
+                      height: 10,
+                      bgcolor: "background.paper",
+                      transform: "translateY(-50%) rotate(45deg)",
+                      zIndex: 0,
+                    },
+                  },
+                }}
+              >
+                <MenuItem onClick={handleClose}>Profile</MenuItem>
+                <MenuItem onClick={handleClose}>My account</MenuItem>
+                <MenuItem onClick={handleClose}>Logout</MenuItem>
+              </Menu>
+            </div>
           </Toolbar>
         </AppBar>
 
@@ -459,8 +593,9 @@ export default function ResponsiveDrawer(props: Props) {
               "& .MuiDrawer-paper": {
                 boxSizing: "border-box",
                 width: drawerWidth,
-                background: "rgb(166, 27, 48)",
-                color: "#fff",
+
+                background: darkMode ? " rgb(67, 0, 10)" : "rgb(166, 27, 48)",
+                color: "#FFF",
               },
               background: "#9E0303",
             }}
@@ -591,6 +726,40 @@ export default function ResponsiveDrawer(props: Props) {
         </Box>
       </Box>
       <Outlet />
-    </>
+      <main style={{ marginLeft: mobileOpen ? "250px" : "20px" }}>
+        <Box>
+          <Paper
+            elevation={3}
+            style={{
+              padding: 10,
+              marginTop: 80,
+              marginRight: "20px",
+              marginBottom: "20px",
+              backgroundColor: backgroundColor,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <div
+                style={{
+                  color: darkMode ? " rgb(166, 27, 48)" : "rgb(166, 27, 48)",
+                }}
+              >
+                <h2 style={{ margin: "0px" }}>Welcome back!</h2>
+              </div>
+              <div style={{ color: "grey" }}>
+                <p style={{ margin: "0px" }}>Back / Dashboard</p>
+              </div>
+            </div>
+          </Paper>
+        </Box>
+        <Dashboard />
+      </main>
+    </div>
   );
 }
