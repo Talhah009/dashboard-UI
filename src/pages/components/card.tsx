@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { Card, CardContent, Grid, Typography } from "@mui/material";
 import { toggleDarkMode } from "../../store/slice";
+import { hover } from "@testing-library/user-event/dist/hover";
 
 interface CardData {
   id: number;
@@ -57,7 +58,7 @@ const MyCard: React.FC<CardData> = ({ title, numbers, imgSrc }) => {
     : { backgroundColor: "#fff", textColor: "#000" };
 
   return (
-    <Grid item xs={12} sm={6} md={4} xl={3}>
+    <Grid item xs={12} sm={6} md={3} xl={3}>
       <Card
         style={{
           width: "95%",
@@ -65,8 +66,9 @@ const MyCard: React.FC<CardData> = ({ title, numbers, imgSrc }) => {
           marginLeft: "20px",
           backgroundColor: backgroundColor,
           color: textColor,
-          transition: "transform 0.3s ease",
-          transform: hovered ? "scale(1.05)" : "scale(1)",
+          transition: "transform 0.5s ease",
+          transform: hovered ? "scale(1.03)" : "scale(1)",
+          boxShadow: hovered? "0 0 15px rgb(0 0 0 / 45%)": "",
         }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}

@@ -23,3 +23,4 @@ const userSlice = createSlice({
 export const { toggleDarkMode } = userSlice.actions;
 
 export default userSlice.reducer;
+

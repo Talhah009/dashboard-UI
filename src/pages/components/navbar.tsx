@@ -16,14 +16,19 @@ import {
   Menu,
   MenuItem,
 } from "@mui/material";
-import { Fullscreen, DarkMode, Menu as MenuIcon } from "@mui/icons-material";
+import {
+  Fullscreen,
+  FullscreenExit,
+  DarkMode,
+  Menu as MenuIcon,
+  Brightness7,
+} from "@mui/icons-material";
 import { Outlet } from "react-router";
 import Dashboard from "../Dashboard";
 import { useSelector, useDispatch } from "react-redux";
 import { toggleDarkMode } from "../../store/slice";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
-const drawerWidth = 240;
+const drawerWidth = 270;
 
 interface Props {
   /**
@@ -47,6 +52,7 @@ export default function ResponsiveDrawer(props: Props) {
   const { window } = props;
   const [mobileOpen, setMobileOpen] = React.useState(true);
   const [isClosing, setIsClosing] = React.useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const darkMode = useSelector((state: any) => state.user.darkMode);
   const dispatch = useDispatch();
   const { backgroundColor, textColor } = darkMode
@@ -85,8 +91,10 @@ export default function ResponsiveDrawer(props: Props) {
           `Error attempting to enable full-screen mode: ${err.message} (${err.name})`
         );
       });
+      setIsFullscreen(true);
     } else {
       document.exitFullscreen();
+      setIsFullscreen(false);
     }
   };
 
@@ -226,23 +234,29 @@ export default function ResponsiveDrawer(props: Props) {
             key={index}
             disablePadding
             sx={{
-              padding: "8px 0px",
+              padding: "10px 0px",
             }}
           >
             <ListItemButton
               disableRipple
               sx={{
+                borderRadius: "10px",
+                padding: "3px 15px",
                 "&:hover": {
                   backgroundColor: "rgb(249, 217, 182)",
                   color: "rgb(166, 27, 48)",
+                  borderRadius: "10px",
+                  padding: "3px 15px",
                 },
                 "&.Mui-selected, &.Mui-selected:hover": {
                   backgroundColor: "transparent",
                 },
               }}
             >
-              <ListItemIcon>{icons[index]}</ListItemIcon>
-              <ListItemText primary={text} />
+              <ListItemIcon sx={{ minWidth: "50px", height: "25px" }}>
+                {icons[index]}
+              </ListItemIcon>
+              <ListItemText primary={text} sx={{ fontSize: "16px" }} />
             </ListItemButton>
           </ListItem>
         ))}
@@ -256,7 +270,7 @@ export default function ResponsiveDrawer(props: Props) {
     <div
       className="main-container"
       style={{
-        backgroundColor: darkMode ? " #000" : "#fff",
+        backgroundColor: darkMode ? " #000" : "#EBEEF6",
         height: "100vh",
       }}
     >
@@ -269,11 +283,12 @@ export default function ResponsiveDrawer(props: Props) {
             width: { sm: `calc(100% - ${drawerWidth}px)` },
             ml: { sm: `${drawerWidth}px` },
             backgroundColor: backgroundColor,
+            boxShadow: "0",
           }}
         >
           <Toolbar>
             <IconButton
-              color="primary" 
+              color="primary"
               aria-label="open drawer"
               edge="start"
               onClick={handleDrawerToggle}
@@ -323,7 +338,13 @@ export default function ResponsiveDrawer(props: Props) {
                 }}
                 onClick={() => dispatch(toggleDarkMode())}
               >
-                <DarkMode sx={{ width: "40px", color: "rgb(61, 68, 101" }} />
+                {darkMode ? (
+                  <Brightness7
+                    sx={{ width: "40px", color: "rgb(61, 68, 101)" }}
+                  />
+                ) : (
+                  <DarkMode sx={{ width: "40px", color: "rgb(61, 68, 101)" }} />
+                )}
               </div>
             </IconButton>
 
@@ -349,9 +370,17 @@ export default function ResponsiveDrawer(props: Props) {
                   borderRadius: "5px",
                 }}
               >
-                <Fullscreen
-                  sx={{ fontSize: "34px", color: "rgb(61, 68, 101" }}
-                />
+                {isFullscreen ? (
+                  <FullscreenExit
+                    sx={{ fontSize: "34px", color: "rgb(61, 68, 101)" }}
+                    onClick={toggleFullscreen}
+                  />
+                ) : (
+                  <Fullscreen
+                    sx={{ fontSize: "34px", color: "rgb(61, 68, 101)" }}
+                    onClick={toggleFullscreen}
+                  />
+                )}
               </div>
             </IconButton>
 
@@ -386,6 +415,7 @@ export default function ResponsiveDrawer(props: Props) {
                     margin: "0",
                     marginLeft: "7px",
                     fontSize: "14px",
+                    textAlign: "left",
                   }}
                 >
                   Hey,{" "}
@@ -726,7 +756,7 @@ export default function ResponsiveDrawer(props: Props) {
         </Box>
       </Box>
       <Outlet />
-      <main style={{ marginLeft: mobileOpen ? "250px" : "20px" }}>
+      <main style={{ marginLeft: mobileOpen ? "280px" : "20px" }}>
         <Box>
           <Paper
             elevation={3}
@@ -736,6 +766,7 @@ export default function ResponsiveDrawer(props: Props) {
               marginRight: "20px",
               marginBottom: "20px",
               backgroundColor: backgroundColor,
+              boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
             }}
           >
             <div
@@ -750,7 +781,16 @@ export default function ResponsiveDrawer(props: Props) {
                   color: darkMode ? " rgb(166, 27, 48)" : "rgb(166, 27, 48)",
                 }}
               >
-                <h2 style={{ margin: "0px" }}>Welcome back!</h2>
+                <h2
+                  style={{
+                    margin: "0px",
+                    marginLeft: "25px",
+                    fontWeight: " 600",
+                    fontSize: "24px",
+                  }}
+                >
+                  Welcome back!
+                </h2>
               </div>
               <div style={{ color: "grey" }}>
                 <p style={{ margin: "0px" }}>Back / Dashboard</p>
